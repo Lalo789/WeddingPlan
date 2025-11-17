@@ -1,0 +1,227 @@
+{% extends "base.htm" %}
+
+{% block title %}Nuestros Servicios - Wedding Plan{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Encabezado -->
+    <div class="row mb-5 text-center">
+        <div class="col-12">
+            <h1 class="display-3">Nuestros Servicios</h1>
+            <p class="lead text-muted">Diseñamos experiencias inolvidables con atención a cada detalle</p>
+        </div>
+    </div>
+
+    <!-- Filtro por Categoría -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-center flex-wrap gap-2">
+                <button class="btn btn-outline-secondary filter-btn active" data-filter="all">
+                    <i class="fas fa-th"></i> Todos
+                </button>
+                <button class="btn btn-outline-secondary filter-btn" data-filter="decoracion">
+                    <i class="fas fa-paint-brush"></i> Decoración
+                </button>
+                <button class="btn btn-outline-secondary filter-btn" data-filter="catering">
+                    <i class="fas fa-utensils"></i> Catering
+                </button>
+                <button class="btn btn-outline-secondary filter-btn" data-filter="fotografia">
+                    <i class="fas fa-camera"></i> Fotografía
+                </button>
+                <button class="btn btn-outline-secondary filter-btn" data-filter="entretenimiento">
+                    <i class="fas fa-music"></i> Entretenimiento
+                </button>
+                <button class="btn btn-outline-secondary filter-btn" data-filter="coordinacion">
+                    <i class="fas fa-tasks"></i> Coordinación
+                </button>
+                <button class="btn btn-outline-secondary filter-btn" data-filter="reposteria">
+                    <i class="fas fa-birthday-cake"></i> Repostería
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de Servicios -->
+    {% if servicios %}
+        <div class="row g-4" id="serviciosGrid">
+            {% for servicio in servicios %}
+                <div class="col-md-6 col-lg-4 servicio-item" data-categoria="{{ servicio.categoria }}">
+                    <div class="card card-custom h-100 shadow-sm">
+                        {% if servicio.imagen_url %}
+                            <img src="{{ servicio.imagen_url }}" class="card-img-top" alt="{{ servicio.nombre }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 200px; background: linear-gradient(135deg, var(--color-oro) 0%, #a8874a 100%);">
+                                <i class="fas fa-concierge-bell fa-4x text-white"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">{{ servicio.nombre }}</h5>
+                                <span class="badge bg-secondary">{{ servicio.categoria }}</span>
+                            </div>
+                            
+                            <p class="card-text text-muted">
+                                {{ servicio.descripcion[:100] }}{% if servicio.descripcion and servicio.descripcion|length > 100 %}...{% endif %}
+                            </p>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <h4 class="text-success mb-0">{{ servicio.precio_base|currency }}</h4>
+                                {% if current_user.is_authenticated and not current_user.es_admin() %}
+                                    <button class="btn btn-sm btn-gold" data-bs-toggle="modal" data-bs-target="#detalleModal{{ servicio.id }}">
+                                        <i class="fas fa-info-circle"></i> Ver Más
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#detalleModal{{ servicio.id }}">
+                                        <i class="fas fa-info-circle"></i> Ver Más
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Modal de Detalle del Servicio -->
+                <div class="modal fade" id="detalleModal{{ servicio.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background-color: var(--color-oro); color: white;">
+                                <h5 class="modal-title">{{ servicio.nombre }}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                {% if servicio.imagen_url %}
+                                    <img src="{{ servicio.imagen_url }}" class="img-fluid rounded mb-3" alt="{{ servicio.nombre }}">
+                                {% endif %}
+                                
+                                <p><strong>Categoría:</strong> <span class="badge bg-secondary">{{ servicio.categoria }}</span></p>
+                                <p><strong>Descripción:</strong></p>
+                                <p>{{ servicio.descripcion or 'No hay descripción disponible.' }}</p>
+                                
+                                <hr>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-0">Precio Base:</h5>
+                                        <h3 class="text-success">{{ servicio.precio_base|currency }}</h3>
+                                    </div>
+                                    {% if current_user.is_authenticated and not current_user.es_admin() %}
+                                        <a href="{{ url_for('cliente_dashboard') }}" class="btn btn-gold">
+                                            <i class="fas fa-calendar-plus"></i> Agregar a Mi Evento
+                                        </a>
+                                    {% elif not current_user.is_authenticated %}
+                                        <a href="{{ url_for('registro') }}" class="btn btn-gold">
+                                            <i class="fas fa-user-plus"></i> Regístrate para Contratar
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info text-center p-5">
+                    <i class="fas fa-info-circle fa-3x mb-3"></i>
+                    <h4>No hay servicios disponibles en este momento</h4>
+                    <p>Pronto agregaremos nuevos servicios para tu evento especial.</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Mensaje de llamada a la acción -->
+    {% if not current_user.is_authenticated %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card text-center shadow-lg" style="background: linear-gradient(135deg, var(--color-oro) 0%, #a8874a 100%); color: white;">
+                    <div class="card-body p-5">
+                        <h2 class="mb-3">¿Listo para planificar tu evento?</h2>
+                        <p class="lead mb-4">Regístrate ahora y comienza a crear el evento de tus sueños</p>
+                        <a href="{{ url_for('registro') }}" class="btn btn-light btn-lg px-5">
+                            <i class="fas fa-user-plus"></i> Crear Cuenta Gratis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Sistema de filtrado dinámico por categoría
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const servicioItems = document.querySelectorAll('.servicio-item');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const filterValue = this.getAttribute('data-filter');
+                
+                // Actualizar botones activos
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Filtrar servicios con animación
+                servicioItems.forEach(item => {
+                    const categoria = item.getAttribute('data-categoria');
+                    
+                    if (filterValue === 'all' || categoria === filterValue) {
+                        item.style.display = '';
+                        item.classList.add('fade-in');
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+    
+    // Animación de entrada
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in');
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.servicio-item').forEach(item => {
+        observer.observe(item);
+    });
+</script>
+
+<style>
+    .servicio-item {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+    }
+    
+    .servicio-item.fade-in {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .filter-btn {
+        transition: all 0.3s ease;
+    }
+    
+    .filter-btn.active {
+        background-color: var(--color-oro);
+        color: white;
+        border-color: var(--color-oro);
+    }
+    
+    .filter-btn:hover {
+        background-color: var(--color-oro);
+        color: white;
+        border-color: var(--color-oro);
+    }
+</style>
+{% endblock %}

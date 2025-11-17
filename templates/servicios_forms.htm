@@ -1,0 +1,40 @@
+{% extends "base.htm" %}
+
+{% block title %}Formulario de Servicio - Wedding Plan{% endblock %}
+
+{% block head_css %}
+    <link rel="stylesheet" href="https://raw.githack.com/Lalo789/WeedingPlan/main/css/forms.css">
+{% endblock %}
+
+{% block content %}
+<form>
+    <h2>Formulario de Productos y Servicios</h2>
+    
+    <div class="form-group">
+        <label for="nombre">Nombre del Servicio/Producto:</label>
+        <input type="text" id="nombre" name="nombre" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="descripcion">Descripción:</label>
+        <textarea id="descripcion" name="descripcion" rows="4" required></textarea>
+    </div>
+    
+    <div class="form-group">
+        <label for="precio">Precio:</label>
+        <input type="number" id="precio" name="precio" step="0.01" required>
+    </div>
+    
+    <div class="form-buttons">
+        <button type="submit" class="btn-save">Guardar</button>
+        <button type="button" class="btn-delete">Eliminar</button>
+        <button type="reset" class="btn-cancel">Cancelar</button>
+        <button id="btn-modify" type="button" class="btn-modify">Modificar <br> eventos</button>
+    </div>
+</form>
+<script>
+    document.getElementById('btn-modify').onclick = function() {
+        window.location.href = "{{ url_for('servicios_mod') }}";
+    };
+</script>
+{% endblock %}

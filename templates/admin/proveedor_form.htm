@@ -1,0 +1,134 @@
+{% extends "base.htm" %}
+
+{% block title %}{{ accion }} Proveedor - Wedding Plan{% endblock %}
+
+{% block head_css %}
+<link rel="stylesheet" href="https://raw.githack.com/Lalo789/WeedingPlan/main/css/forms.css">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card card-custom shadow-lg">
+                <div class="card-header text-white text-center py-3" style="background-color: var(--color-oro);">
+                    <h2 class="mb-0"><i class="fas fa-user-tie"></i> {{ accion }} Proveedor</h2>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" id="proveedorForm" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.nombre.label(class="form-label fw-bold") }}
+                                {{ form.nombre(class="form-control" ~ (" is-invalid" if form.nombre.errors else "")) }}
+                                {% if form.nombre.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.nombre.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.tipo_servicio.label(class="form-label fw-bold") }}
+                                {{ form.tipo_servicio(class="form-control" ~ (" is-invalid" if form.tipo_servicio.errors else "")) }}
+                                {% if form.tipo_servicio.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.tipo_servicio.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.contacto.label(class="form-label fw-bold") }}
+                                {{ form.contacto(class="form-control" ~ (" is-invalid" if form.contacto.errors else "")) }}
+                                {% if form.contacto.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.contacto.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.telefono.label(class="form-label fw-bold") }}
+                                {{ form.telefono(class="form-control" ~ (" is-invalid" if form.telefono.errors else "")) }}
+                                {% if form.telefono.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.telefono.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                {{ form.email.label(class="form-label fw-bold") }}
+                                {{ form.email(class="form-control" ~ (" is-invalid" if form.email.errors else "")) }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                {{ form.calificacion.label(class="form-label fw-bold") }}
+                                {{ form.calificacion(class="form-control" ~ (" is-invalid" if form.calificacion.errors else "")) }}
+                                {% if form.calificacion.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.calificacion.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.notas.label(class="form-label fw-bold") }}
+                            {{ form.notas(class="form-control" ~ (" is-invalid" if form.notas.errors else ""), rows="3") }}
+                            {% if form.notas.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.notas.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.activo(class="form-check-input") }}
+                                {{ form.activo.label(class="form-check-label fw-bold") }}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('admin_proveedores') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-gold btn-lg">
+                                <i class="fas fa-save"></i> {{ accion }} Proveedor
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function() {
+        'use strict';
+        const form = document.getElementById('proveedorForm');
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    })();
+</script>
+{% endblock %}

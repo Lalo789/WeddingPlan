@@ -1,0 +1,179 @@
+{% extends "base.htm" %}
+
+{% block title %}Bienvenido a Wedding Plan{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row mb-5 mt-4">
+        <div class="col-12">
+            <div class="invitation-card">
+                <h1 class="display-2">Bienvenidos a Wedding Plan</h1>
+                <p class="lead mb-4">El inicio de una celebración inolvidable.</p>
+
+                <hr style="border: 0; height: 2px; background: linear-gradient(to right, rgba(0, 0, 0, 0), var(--color-oro), rgba(0, 0, 0, 0)); margin: 40px 0;">
+                
+                <h2 class="mb-4">Nuestra Misión</h2>
+                <p class="mb-5">
+                    Desarrollar una plataforma web que permita gestionar, organizar y optimizar la planificación 
+                    de eventos, principalmente bodas, para convertir tus sueños en realidad.
+                </p>
+
+                {% if not current_user.is_authenticated %}
+                    <h2 class="mb-4">Comenzar</h2>
+                    <div class="button-container">
+                        <a href="{{ url_for('registro') }}" class="btn btn-gold btn-lg">
+                            <i class="fas fa-user-plus"></i> Registrarse
+                        </a>
+                        <a href="{{ url_for('servicios') }}" class="btn btn-gold btn-lg">
+                            <i class="fas fa-concierge-bell"></i> Explorar Servicios
+                        </a>
+                    </div>
+                {% else %}
+                    <h2 class="mb-4">Acceso Rápido</h2>
+                    <div class="button-container">
+                        {% if current_user.es_admin() %}
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-gold btn-lg">
+                                <i class="fas fa-tachometer-alt"></i> Panel Admin
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('cliente_dashboard') }}" class="btn btn-gold btn-lg">
+                                <i class="fas fa-calendar-alt"></i> Mis Eventos
+                            </a>
+                            <a href="{{ url_for('cliente_nuevo_evento') }}" class="btn btn-gold btn-lg">
+                                <i class="fas fa-plus-circle"></i> Crear Evento
+                            </a>
+                        {% endif %}
+                        <a href="{{ url_for('servicios') }}" class="btn btn-gold btn-lg">
+                            <i class="fas fa-concierge-bell"></i> Ver Servicios
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Características Principales -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <h2 class="display-4">¿Por qué Wedding Plan?</h2>
+            <p class="lead text-muted">Simplificamos la planificación de tu evento especial</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card card-custom text-center h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <i class="fas fa-clipboard-list fa-3x mb-3" style="color: var(--color-oro);"></i>
+                    <h4>Gestión Completa</h4>
+                    <p>Organiza todos los aspectos de tu evento en un solo lugar. Controla servicios, proveedores y presupuesto.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card card-custom text-center h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <i class="fas fa-money-check-alt fa-3x mb-3" style="color: var(--color-oro);"></i>
+                    <h4>Control de Presupuesto</h4>
+                    <p>Mantén el control de tus gastos con cálculos automáticos y visualización en tiempo real.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card card-custom text-center h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <i class="fas fa-heart fa-3x mb-3" style="color: var(--color-oro);"></i>
+                    <h4>Servicio Personalizado</h4>
+                    <p>Cada evento es único. Personaliza servicios y ajusta precios según tus necesidades.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    {% if not current_user.is_authenticated %}
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card text-white shadow-lg" style="background: linear-gradient(135deg, var(--color-oro) 0%, #a8874a 100%);">
+                    <div class="card-body text-center p-5">
+                        <h2 class="display-5 mb-3">¿Listo para comenzar?</h2>
+                        <p class="lead mb-4">Únete a Wedding Plan y transforma la planificación de tu evento en una experiencia memorable</p>
+                        <a href="{{ url_for('registro') }}" class="btn btn-light btn-lg px-5 me-3">
+                            <i class="fas fa-user-plus"></i> Crear Cuenta
+                        </a>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-5">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Prueba de Conexión a BD (solo para desarrollo) -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <button id="test-db-btn" class="btn btn-outline-secondary">
+                <i class="fas fa-database"></i> Probar Conexión a PostgreSQL
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Prueba de conexión a base de datos
+    document.getElementById('test-db-btn').addEventListener('click', function() {
+        const button = this;
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando...';
+        
+        fetch('/test-db')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    button.classList.remove('btn-outline-secondary');
+                    button.classList.add('btn-success');
+                    button.innerHTML = '<i class="fas fa-check"></i> ' + data.message;
+                } else {
+                    button.classList.remove('btn-outline-secondary');
+                    button.classList.add('btn-danger');
+                    button.innerHTML = '<i class="fas fa-times"></i> Error: ' + data.message;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                button.classList.remove('btn-outline-secondary');
+                button.classList.add('btn-danger');
+                button.innerHTML = '<i class="fas fa-times"></i> No se pudo conectar';
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.classList.remove('btn-success', 'btn-danger');
+                    button.classList.add('btn-outline-secondary');
+                    button.innerHTML = '<i class="fas fa-database"></i> Probar Conexión a PostgreSQL';
+                }, 3000);
+            });
+    });
+
+    // Animación de entrada para las tarjetas
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.card-custom').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'all 0.6s ease';
+        observer.observe(card);
+    });
+</script>
+{% endblock %}

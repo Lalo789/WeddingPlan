@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;600&display=swap');
+:root {
+        --color-fondo: #FAF3E0;
+        --color-texto: #5D4037;
+        --color-oro: #C0A062;
+        --fuente-titulos: 'Great Vibes', cursive;
+        --fuente-cuerpo: 'Montserrat', sans-serif;
+    }
+    
+    body {
+        font-family: var(--fuente-cuerpo);
+        background-color: var(--color-fondo);
+        color: var(--color-texto);
+        padding-top: 80px;
+    }
+    
+    /* Navbar personalizado */
+    .navbar-custom {
+        background-color: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-bottom-left-radius: 25px;
+        border-bottom-right-radius: 25px;
+    }
+    
+    .navbar-brand {
+        font-family: var(--fuente-titulos);
+        font-size: 2.5rem;
+        color: var(--color-oro) !important;
+    }
+    
+    .nav-link {
+        color: var(--color-texto) !important;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+    
+    .nav-link:hover {
+        color: var(--color-oro) !important;
+    }
+    
+    .btn-gold {
+        background-color: var(--color-oro);
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-gold:hover {
+        background-color: #a8874a;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    h1, h2, h3 {
+        font-family: var(--fuente-titulos);
+        color: var(--color-oro);
+    }
+    
+    .footer-custom {
+        background-color: white;
+        border-top: 2px solid var(--color-oro);
+        margin-top: 50px;
+    }
+    
+    .footer-title {
+        font-family: var(--fuente-titulos);
+        font-size: 2rem;
+        color: var(--color-oro);
+    }
+    .alert-success {
+        background-color: #d4edda;
+        border-color: var(--color-oro);
+        color: var(--color-texto);
+    }
+    .card-custom {
+        border: 2px solid var(--color-oro);
+        border-radius: 10px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card-custom:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+nav ul {
+    background-color: #444;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    padding: 15px 20px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 20px;
+    min-height: 70vh;
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+}
+
+.validation-links {
+    padding-top: 15px;
+}
+
+.validation-links a {
+    margin: 0 10px;
+}
+

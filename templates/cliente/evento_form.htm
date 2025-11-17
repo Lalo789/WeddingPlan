@@ -1,0 +1,182 @@
+{% extends "base.htm" %}
+
+{% block title %}{{ accion }} Evento - Wedding Plan{% endblock %}
+
+{% block head_css %}
+<link rel="stylesheet" href="https://raw.githack.com/Lalo789/WeedingPlan/main/css/forms.css">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card card-custom shadow-lg">
+                <div class="card-header text-white text-center py-3" style="background-color: var(--color-oro);">
+                    <h2 style="color:aliceblue" class="mb-0">
+                        <i class="fas fa-calendar-alt"></i> {{ accion }} Evento
+                    </h2>
+                </div>
+                <div class="card-body p-5">
+                    <form method="POST" id="eventoForm" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Título del Evento -->
+                        <div class="mb-4">
+                            {{ form.titulo.label(class="form-label fw-bold") }}
+                            {{ form.titulo(class="form-control form-control-lg" ~ (" is-invalid" if form.titulo.errors else "")) }}
+                            <div class="form-text">Ejemplo: "Boda de María y Juan"</div>
+                            {% if form.titulo.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.titulo.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Fecha del Evento -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                {{ form.fecha_evento.label(class="form-label fw-bold") }}
+                                {{ form.fecha_evento(class="form-control" ~ (" is-invalid" if form.fecha_evento.errors else "")) }}
+                                {% if form.fecha_evento.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.fecha_evento.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Número de Invitados -->
+                            <div class="col-md-6">
+                                {{ form.num_invitados.label(class="form-label fw-bold") }}
+                                {{ form.num_invitados(class="form-control" ~ (" is-invalid" if form.num_invitados.errors else ""), min="1") }}
+                                {% if form.num_invitados.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.num_invitados.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Lugar -->
+                        <div class="mb-4">
+                            {{ form.lugar.label(class="form-label fw-bold") }}
+                            {{ form.lugar(class="form-control" ~ (" is-invalid" if form.lugar.errors else "")) }}
+                            <div class="form-text">Dirección completa o nombre del lugar</div>
+                            {% if form.lugar.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.lugar.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Descripción -->
+                        <div class="mb-4">
+                            {{ form.descripcion.label(class="form-label fw-bold") }}
+                            {{ form.descripcion(class="form-control" ~ (" is-invalid" if form.descripcion.errors else ""), rows="4") }}
+                            <div class="form-text">
+                                <span id="charCount">0</span>/1000 caracteres
+                            </div>
+                            {% if form.descripcion.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.descripcion.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Presupuesto -->
+                        <div class="mb-4">
+                            {{ form.presupuesto_estimado.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.presupuesto_estimado(class="form-control" ~ (" is-invalid" if form.presupuesto_estimado.errors else "")) }}
+                                <span class="input-group-text">MXN</span>
+                            </div>
+                            <div class="form-text">Presupuesto estimado para el evento (opcional)</div>
+                            {% if form.presupuesto_estimado.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.presupuesto_estimado.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Estado (solo si es edición y es admin) -->
+                        {% if current_user.es_admin() and evento %}
+                            <div class="mb-4">
+                                {{ form.estado.label(class="form-label fw-bold") }}
+                                {{ form.estado(class="form-select") }}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between mt-5">
+                            <a href="{{ url_for('cliente_dashboard') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-gold btn-lg">
+                                <i class="fas fa-save"></i> {{ accion }} Evento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Validación del lado del cliente
+    (function() {
+        'use strict';
+        const form = document.getElementById('eventoForm');
+        
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    })();
+    
+    // Contador de caracteres para descripción
+    const descripcionField = document.getElementById('descripcion');
+    const charCount = document.getElementById('charCount');
+    
+    if (descripcionField) {
+        descripcionField.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+            
+            if (this.value.length > 1000) {
+                charCount.classList.add('text-danger');
+            } else {
+                charCount.classList.remove('text-danger');
+            }
+        });
+        
+        // Inicializar contador
+        charCount.textContent = descripcionField.value.length;
+    }
+    
+    // Validación de fecha mínima (no puede ser en el pasado)
+    const fechaEvento = document.getElementById('fecha_evento');
+    if (fechaEvento) {
+        const now = new Date();
+        const minDate = now.toISOString().slice(0, 16);
+        fechaEvento.setAttribute('min', minDate);
+    }
+    
+    // Formatear presupuesto con separadores de miles
+    const presupuestoField = document.getElementById('presupuesto_estimado');
+    if (presupuestoField) {
+        presupuestoField.addEventListener('blur', function() {
+            if (this.value) {
+                const value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    this.value = value.toFixed(2);
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

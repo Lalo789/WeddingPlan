@@ -1,0 +1,163 @@
+{% extends "base.htm" %}
+
+{% block title %}Panel de Administración - Wedding Plan{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-5">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="fas fa-tachometer-alt"></i> Panel de Administración</h1>
+            <p class="lead">Bienvenido, <strong>{{ current_user.nombre_completo }}</strong></p>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Estadísticas -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm border-primary">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                    <h2 class="display-4">{{ total_usuarios }}</h2>
+                    <p class="text-muted mb-0">Usuarios Registrados</p>
+                    <a href="{{ url_for('admin_usuarios') }}" class="btn btn-sm btn-outline-primary mt-2">Ver todos</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm border-success">
+                <div class="card-body">
+                    <i class="fas fa-calendar-check fa-3x text-success mb-3"></i>
+                    <h2 class="display-4">{{ total_eventos }}</h2>
+                    <p class="text-muted mb-0">Total de Eventos</p>
+                    <a href="{{ url_for('admin_eventos') }}" class="btn btn-sm btn-outline-success mt-2">Ver todos</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm border-warning">
+                <div class="card-body">
+                    <i class="fas fa-clock fa-3x text-warning mb-3"></i>
+                    <h2 class="display-4">{{ eventos_pendientes }}</h2>
+                    <p class="text-muted mb-0">Eventos Pendientes</p>
+                    <a href="{{ url_for('admin_eventos') }}" class="btn btn-sm btn-outline-warning mt-2">Revisar</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm" style="border-color: var(--color-oro);">
+                <div class="card-body">
+                    <i class="fas fa-concierge-bell fa-3x mb-3" style="color: var(--color-oro);"></i>
+                    <h2 class="display-4">{{ total_servicios }}</h2>
+                    <p class="text-muted mb-0">Servicios Disponibles</p>
+                    <a href="{{ url_for('admin_servicios') }}" class="btn btn-sm btn-gold mt-2">Gestionar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accesos Rápidos -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card card-custom shadow">
+                <div class="card-header" style="background-color: var(--color-oro); color: white;">
+                    <h4 class="mb-0"><i class="fas fa-bolt"></i> Accesos Rápidos</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <a href="{{ url_for('admin_nuevo_servicio') }}" class="btn btn-outline-primary w-100 py-3">
+                                <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
+                                <strong>Crear Servicio</strong>
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ url_for('admin_nuevo_proveedor') }}" class="btn btn-outline-success w-100 py-3">
+                                <i class="fas fa-user-tie fa-2x mb-2"></i><br>
+                                <strong>Agregar Proveedor</strong>
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ url_for('admin_eventos') }}" class="btn btn-outline-warning w-100 py-3">
+                                <i class="fas fa-calendar-alt fa-2x mb-2"></i><br>
+                                <strong>Ver Todos los Eventos</strong>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Eventos Recientes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-custom shadow">
+                <div class="card-header" style="background-color: var(--color-oro); color: white;">
+                    <h4 class="mb-0"><i class="fas fa-history"></i> Eventos Recientes</h4>
+                </div>
+                <div class="card-body">
+                    {% if eventos_recientes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Evento</th>
+                                        <th>Cliente</th>
+                                        <th>Fecha del Evento</th>
+                                        <th>Estado</th>
+                                        <th>Servicios</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for evento in eventos_recientes %}
+                                        <tr>
+                                            <td><strong>{{ evento.titulo }}</strong></td>
+                                            <td>{{ evento.cliente.nombre_completo }}</td>
+                                            <td>{{ evento.fecha_evento|datetime_format('%d/%m/%Y') }}</td>
+                                            <td>
+                                                {% if evento.estado == 'pendiente' %}
+                                                    <span class="badge bg-warning text-dark">Pendiente</span>
+                                                {% elif evento.estado == 'confirmado' %}
+                                                    <span class="badge bg-success">Confirmado</span>
+                                                {% elif evento.estado == 'cancelado' %}
+                                                    <span class="badge bg-danger">Cancelado</span>
+                                                {% elif evento.estado == 'completado' %}
+                                                    <span class="badge bg-info">Completado</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ evento.servicios_contratados|length }}</td>
+                                            <td>
+                                                <a href="{{ url_for('admin_ver_evento', evento_id=evento.id) }}" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-eye"></i> Ver
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i> No hay eventos registrados todavía.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    " Actualizar estadísticas cada 30 segundos (opcional)"
+    setInterval(function() {
+         location.reload();
+     }, 30000);
+</script>
+{% endblock %}

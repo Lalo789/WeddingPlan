@@ -1,0 +1,44 @@
+    {% extends "base.htm" %}
+
+    {% block title %}Bienvenido a Wedding Plan{% endblock %}
+
+    {% block content %}
+    <div class="invitation-card">
+        <h1>Bienvenidos a Wedding Plan</h1>
+        <p>El inicio de una celebración inolvidable.</p>
+
+        <hr>
+        
+        <h2>Nuestra Misión</h2>
+        <p>
+            Desarrollar una plataforma web que permita gestionar, organizar y optimizar la planificación 
+            de eventos, principalmente bodas, para convertir tus sueños en realidad.
+        </p>
+        <hr>
+        
+        <div>
+            <h2>Comenzar</h2>
+            <div class="button-container">
+                <button id="test-db-btn" class="btn">Conexion a PostgreSQL</button> 
+                <button id="servicios-btn" class="btn">Explorar Servicios</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('test-db-btn').addEventListener('click', function() {
+            fetch('/test-db')
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('No se pudo realizar la prueba de conexión.');
+                });
+        });
+        document.getElementById('servicios-btn').addEventListener('click', function() {
+            window.location.href = '{{ url_for("servicios") }}';
+        });
+    </script>
+    {% endblock %}

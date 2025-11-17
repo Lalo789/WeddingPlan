@@ -1,0 +1,34 @@
+{% extends "base.htm" %}
+
+{% block title %}Nuevo Cliente- Wedding Plan{% endblock %}
+
+{% block head_css %}
+    <link rel="stylesheet" href="https://raw.githack.com/Lalo789/WeedingPlan/main/css/forms.css">   
+{% endblock %}
+
+{% block content %}
+    <form action="{{ url_for('nuevo_cliente') }}" method="post">
+        <h2>Registrar Nuevo Cliente</h2>
+        
+        <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+            <label for="telefono">Teléfono:</label>
+            <input type="tel" id="telefono" name="telefono">
+        </div>
+        
+        <div class="form-buttons">
+            <button type="submit" class="btn-save">Guardar Cliente</button>
+        </div>
+    </form>
+</body>
+</html>
+{% endblock %}  

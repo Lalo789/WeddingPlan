@@ -1,0 +1,342 @@
+\{% extends "base.htm" %}
+
+{% block title %}Registro - Wedding Plan{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-8 col-lg-6">
+            <div class="card card-custom shadow-lg">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-user-plus"></i> Crear Cuenta
+                    </h2>
+                    
+                    <form method="POST" action="{{ url_for('registro') }}" id="registroForm" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label fw-bold") }}
+                            {{ form.username(class="form-control" ~ (" is-invalid" if form.username.errors else "")) }}
+                            <div class="form-text">Mínimo 3 caracteres, será tu identificador único</div>
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.nombre_completo.label(class="form-label fw-bold") }}
+                            {{ form.nombre_completo(class="form-control" ~ (" is-invalid" if form.nombre_completo.errors else "")) }}
+                            {% if form.nombre_completo.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.nombre_completo.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.email.label(class="form-label fw-bold") }}
+                            {{ form.email(class="form-control" ~ (" is-invalid" if form.email.errors else ""), type="email") }}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.telefono.label(class="form-label fw-bold") }}
+                            {{ form.telefono(class="form-control" ~ (" is-invalid" if form.telefono.errors else ""), type="tel", pattern="[0-9]{10,15}") }}
+                            <div class="form-text">10-15 dígitos (opcional)</div>
+                            {% if form.telefono.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.telefono.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                {{ form.password(class="form-control" ~ (" is-invalid" if form.password.errors else ""), id="passwordInput") }}
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Mínimo 6 caracteres</div>
+                            <div class="progress mt-2" style="height: 5px;">
+                                <div class="progress-bar" id="passwordStrength" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small id="passwordStrengthText" class="form-text"></small>
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.confirmar_password.label(class="form-label fw-bold") }}
+                            {{ form.confirmar_password(class="form-control" ~ (" is-invalid" if form.confirmar_password.errors else ""), id="confirmPasswordInput") }}
+                            <div id="passwordMatch" class="form-text"></div>
+                            {% if form.confirmar_password.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.confirmar_password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Botón Submit -->
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-gold btn-lg">
+                                <i class="fas fa-user-plus"></i> Crear Cuenta
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-0">¿Ya tienes cuenta? 
+                            <a href="{{ url_for('login') }}" class="text-decoration-none fw-bold" style="color: var(--color-oro);">
+                                Inicia sesión aquí
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Validación del lado del cliente
+    (function() {
+        'use strict';
+        
+        const form = document.getElementById('registroForm');
+        
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            form.classList.add('was-validated');
+        }, false);
+    })();
+    
+    // Toggle mostrar/ocultar contraseña
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordInput = document.getElementById('passwordInput');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    });
+
+    //AJAX para verificar el username en tiempo real
+    let timeoutUsername;
+    const usernameInput = document.getElementById('username');
+    const usernameParent = usernameInput.closest('.mb-3');
+
+    usernameInput.addEventListener('input', function() {
+
+        clearTiemout(timeoutUsername);
+
+        //Limpiar el feedback anterior
+        let feedback = usernameParent.querySelector('.ajax-feedback');
+        if (feedback) feedback.remove();
+
+        if (username.length < 3) {
+            return; //No verificar si es muy corto
+        }
+        
+        //Esperar 500ms después de que el usuario deje de escribir
+        timeoutUsername = setTimeout(() => {
+            //Mostrar un indicador de carga
+            usernameInput.classList.add('is-validating');
+
+            //Petición AJAX
+            fetch('/api/verificar-username',{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({username: usernameInput.value})
+            })
+            .then(response => response.json())
+            .then(data => {
+                usernameInput.classList.remove('is-validating');
+
+                //crear elemento de feedback
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.classList.add('ajax-feedback mt-1');
+
+                if (data.disponible){
+                    feedbackDiv.innerHTML = '<small class="text-success"><i class="fas fa-check-circle"></i> ${data.mensaje}</small>';
+                    usernameInput.classList.remove('is-invalid');
+                    usernameInput.classList.add('is-valid');
+                }else{
+                    feedbackDiv.innerHTML = '<small class="text-danger"><i class="fas fa-times-circle"></i> ${data.mensaje}</small>';
+                    usernameInput.classList.remove('is-valid');
+                    usernameInput.classList.add('is-invalid');
+                }
+
+                usernameParent.appendChild(feedbackDiv);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                usernameInput.classList.remove('is-validating');
+        })
+    }, 500);
+    });
+
+    //AJAX verificar email en tiempo real
+    let timeoutEmail;
+    const emailInput = document.getElementById('email');
+    const emailParent = emailInput.closest('.mb-3');
+
+    emailImput.addEventListener('input', function() {
+
+        clearTiemout(timeoutEmail);
+
+        const email = this.value.trim();
+
+        //Limpiar el feedback anterior
+        let feedback = emailParent.querySelector('.ajax-feedback');
+        if (feedback) feedback.remove();
+
+        if(email.length < 5 ){
+            return; 
+        }
+
+        timeoutEmail = setTimeout(() => {
+            emailInput.classList.add('is-validating');
+
+            //Petición AJAX
+            fetch('/api/verificar-email',{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({email: email})
+            })
+            .then(response => response.json())
+            .then(data => {
+                emailInput.classList.remove('is-validating');
+
+                //crear elemento de feedback
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className.add('ajax-feedback', 'mt-1');
+
+                if (data.disponible){
+                    feedbackDiv.innerHTML = '<small class="text-success"><i class="fas fa-check-circle"></i> ${data.mensaje}</small>';
+                    emailInput.classList.remove('is-invalid');
+                    emailInput.classList.add('is-valid');
+                }else{
+                    feedbackDiv.innerHTML = '<small class="text-danger"><i class="fas fa-times-circle"></i> ${data.mensaje}</small>';
+                    emailInput.classList.remove('is-valid');
+                    emailInput.classList.add('is-invalid');
+                }
+
+                emailParent.appendChild(feedbackDiv);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                emailInput.classList.remove('is-validating');
+            })
+        }, 500);
+    });
+    
+    // Indicador de fortaleza de contraseña
+    document.getElementById('passwordInput').addEventListener('input', function() {
+        const password = this.value;
+        const strengthBar = document.getElementById('passwordStrength');
+        const strengthText = document.getElementById('passwordStrengthText');
+        
+        let strength = 0;
+        let text = '';
+        let color = '';
+        
+        // Criterios de fortaleza
+        if (password.length >= 6) strength += 25;
+        if (password.length >= 8) strength += 25;
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 25;
+        if (/[0-9]/.test(password)) strength += 15;
+        if (/[^a-zA-Z0-9]/.test(password)) strength += 10;
+        
+        if (strength < 25) {
+            text = 'Muy débil';
+            color = 'bg-danger';
+        } else if (strength < 50) {
+            text = 'Débil';
+            color = 'bg-warning';
+        } else if (strength < 75) {
+            text = 'Media';
+            color = 'bg-info';
+        } else {
+            text = 'Fuerte';
+            color = 'bg-success';
+        }
+        
+        strengthBar.style.width = strength + '%';
+        strengthBar.className = 'progress-bar ' + color;
+        strengthText.textContent = password.length > 0 ? 'Fortaleza: ' + text : '';
+    });
+    
+    // Validación en tiempo real de coincidencia de contraseñas
+    document.getElementById('confirmPasswordInput').addEventListener('input', function() {
+        const password = document.getElementById('passwordInput').value;
+        const confirmPassword = this.value;
+        const matchText = document.getElementById('passwordMatch');
+        
+        if (confirmPassword.length === 0) {
+            matchText.textContent = '';
+            return;
+        }
+        
+        if (password === confirmPassword) {
+            matchText.textContent = 'Las contraseñas coinciden';
+            matchText.style.color = 'green';
+        } else {
+            matchText.textContent = 'Las contraseñas no coinciden';
+            matchText.style.color = 'red';
+        }
+    });
+</script>
+
+<style> 
+    /*indicar carga de ajax*/
+    .is-validateing{
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='margin: auto; background: none; display: block;' width='24px' height='24px' viewBox='0 0 100 100' preserveAspectRatio='xMidYMid'%3E%3Ccircle cx='50' cy='50' r='32' stroke-width='8' stroke='%23666' stroke-dasharray='50.26548245743669 50.26548245743669' fill='none' stroke-linecap='round'%3E%3CanimateTransform attributeName='transform' type='rotate' repeatCount='indefinite' dur='1s' values='0 50 50;360 50 50' keyTimes='0;1'%3E%3C/animateTransform%3E%3C/circle%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 20px 20px;
+    }
+    
+</style>
+{% endblock %}

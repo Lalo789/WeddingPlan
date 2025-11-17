@@ -1,0 +1,345 @@
+={% extends "base.htm" %}
+
+{% block title %}{{ evento.titulo }} - Wedding Plan{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Encabezado del Evento -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="fas fa-calendar-check"></i> {{ evento.titulo }}</h1>
+            <p class="lead text-muted">Creado el {{ evento.fecha_creacion|datetime_format('%d/%m/%Y') }}</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('cliente_editar_evento', evento_id=evento.id) }}" class="btn btn-warning me-2">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            {% if evento.estado != 'cancelado' %}
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelarModal">
+                    <i class="fas fa-times-circle"></i> Cancelar
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Información General -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card card-custom">
+                <div class="card-header" style="background-color: var(--color-oro); color: white;">
+                    <h4 class="mb-0"><i class="fas fa-info-circle"></i> Información del Evento</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong><i class="fas fa-calendar"></i> Fecha:</strong></p>
+                            <p class="ms-4">{{ evento.fecha_evento|datetime_format('%d de %B, %Y') }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong><i class="fas fa-clock"></i> Hora:</strong></p>
+                            <p class="ms-4">{{ evento.fecha_evento|datetime_format('%H:%M hrs') }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p><strong><i class="fas fa-map-marker-alt"></i> Lugar:</strong></p>
+                        <p class="ms-4">{{ evento.lugar }}</p>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong><i class="fas fa-users"></i> Invitados:</strong></p>
+                            <p class="ms-4">{{ evento.num_invitados or 'No especificado' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong><i class="fas fa-money-bill-wave"></i> Presupuesto:</strong></p>
+                            <p class="ms-4">{{ evento.presupuesto_estimado|currency if evento.presupuesto_estimado else 'No especificado' }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if evento.descripcion %}
+                        <div class="mb-3">
+                            <p><strong><i class="fas fa-file-alt"></i> Descripción:</strong></p>
+                            <p class="ms-4">{{ evento.descripcion }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div>
+                        <p><strong><i class="fas fa-flag"></i> Estado:</strong></p>
+                        <p class="ms-4">
+                            {% if evento.estado == 'pendiente' %}
+                                <span class="badge bg-warning text-dark fs-6">Pendiente</span>
+                            {% elif evento.estado == 'confirmado' %}
+                                <span class="badge bg-success fs-6">Confirmado</span>
+                            {% elif evento.estado == 'cancelado' %}
+                                <span class="badge bg-danger fs-6">Cancelado</span>
+                            {% elif evento.estado == 'completado' %}
+                                <span class="badge bg-info fs-6">Completado</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Resumen Financiero -->
+        <div class="col-md-4">
+            <div class="card text-center shadow-lg border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-calculator"></i> Resumen Financiero</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Presupuesto Estimado</h6>
+                    <h3>{{ evento.presupuesto_estimado|currency if evento.presupuesto_estimado else '$0.00' }}</h3>
+                    
+                    <hr>
+                    
+                    <h6 class="text-muted mb-2">Total Servicios</h6>
+                    <h3 class="text-success">{{ evento.calcular_total()|currency }}</h3>
+                    
+                    <hr>
+                    
+                    {% if evento.presupuesto_estimado %}
+                        <h6 class="text-muted mb-2">Saldo</h6>
+                        {% set saldo = evento.presupuesto_estimado - evento.calcular_total() %}
+                        <h3 class="{{ 'text-success' if saldo >= 0 else 'text-danger' }}">
+                            {{ saldo|currency }}
+                        </h3>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Servicios Contratados -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-custom">
+                <div class="card-header d-flex justify-content-between align-items-center" style="background-color: var(--color-oro); color: white;">
+                    <h4 class="mb-0"><i class="fas fa-concierge-bell"></i> Servicios Contratados</h4>
+                    <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#agregarServicioModal">
+                        <i class="fas fa-plus"></i> Agregar Servicio
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if evento.servicios_contratados %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Servicio</th>
+                                        <th>Categoría</th>
+                                        <th>Precio Acordado</th>
+                                        <th>Fecha Agregado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for es in evento.servicios_contratados %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ es.servicio.nombre }}</strong>
+                                                {% if es.notas %}
+                                                    <br><small class="text-muted">{{ es.notas }}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ es.servicio.categoria }}</span>
+                                            </td>
+                                            <td class="fw-bold text-success">{{ es.precio_acordado|currency }}</td>
+                                            <td>{{ es.fecha_agregado|datetime_format('%d/%m/%Y') }}</td>
+                                            <td>
+                                                <form method="POST" action="{{ url_for('cliente_eliminar_servicio', evento_id=evento.id, servicio_id=es.servicio.id) }}" style="display:inline;">
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este servicio del evento?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th colspan="2" class="text-end">TOTAL:</th>
+                                        <th class="text-success">{{ evento.calcular_total()|currency }}</th>
+                                        <th colspan="2"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle fa-2x mb-3"></i>
+                            <p>No has agregado servicios a este evento todavía.</p>
+                            <button type="button" class="btn btn-gold" data-bs-toggle="modal" data-bs-target="#agregarServicioModal">
+                                <i class="fas fa-plus"></i> Agregar Primer Servicio
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón volver -->
+    <div class="row">
+        <div class="col-12">
+            <a href="{{ url_for('cliente_dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a Mis Eventos
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Agregar Servicio CON BÚSQUEDA AJAX -->
+<div class="modal fade" id="agregarServicioModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: var(--color-oro); color: white;">
+                <h5 class="modal-title"><i class="fas fa-plus-circle"></i> Agregar Servicio al Evento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('cliente_agregar_servicio', evento_id=evento.id) }}">
+                <div class="modal-body">
+                    <!-- Búsqueda AJAX -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Buscar Servicio</label>
+                        <input type="text" id="buscarServicio" class="form-control" placeholder="Escribe para buscar...">
+                        <div id="resultadosBusqueda" class="mt-2"></div>
+                    </div>
+                    
+                    <!-- Campo oculto con el servicio seleccionado -->
+                    <input type="hidden" name="servicio_id" id="servicioIdSeleccionado" required>
+                    
+                    <div id="servicioSeleccionado" class="alert alert-info d-none">
+                        <strong>Servicio seleccionado:</strong> <span id="nombreServicioSeleccionado"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Precio Acordado</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" name="precio_acordado" id="precioAcordado" class="form-control" step="0.01" min="0" required>
+                            <span class="input-group-text">MXN</span>
+                        </div>
+                        <div class="form-text">Puedes negociar un precio diferente al precio base</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-gold">
+                        <i class="fas fa-plus"></i> Agregar Servicio
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Cancelar Evento -->
+<div class="modal fade" id="cancelarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Cancelar Evento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro que deseas cancelar el evento <strong>"{{ evento.titulo }}"</strong>?</p>
+                <p class="text-danger"><strong>Esta acción no se puede deshacer.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, mantener evento</button>
+                <form method="POST" action="{{ url_for('cliente_cancelar_evento', evento_id=evento.id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Sí, cancelar evento</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-completar precio acordado con el precio base del servicio seleccionado
+    document.getElementById('servicioSelect').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const precioBase = selectedOption.getAttribute('data-precio');
+        
+        if (precioBase) {
+            document.getElementById('precioAcordado').value = precioBase;
+        }
+    });
+    // AJAX: BÚSQUEDA DE SERVICIOS EN TIEMPO REAL
+    let timeoutBusqueda;
+    const buscarInput = document.getElementById('buscarServicio');
+    const resultadosDiv = document.getElementById('resultadosBusqueda');
+    const servicioIdInput = document.getElementById('servicioIdSeleccionado');
+    const precioInput = document.getElementById('precioAcordado');
+    const servicioSeleccionadoDiv = document.getElementById('servicioSeleccionado');
+    const nombreServicioSpan = document.getElementById('nombreServicioSeleccionado');
+    
+    buscarInput.addEventListener('input', function() {
+        clearTimeout(timeoutBusqueda);
+        
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            resultadosDiv.innerHTML = '';
+            return;
+        }
+        
+        timeoutBusqueda = setTimeout(() => {
+            // Mostrar indicador de carga
+            resultadosDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Buscando...</div>';
+            
+            // Petición AJAX
+            fetch(`/api/buscar-servicios?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.servicios.length === 0) {
+                        resultadosDiv.innerHTML = '<div class="alert alert-warning">No se encontraron servicios</div>';
+                        return;
+                    }
+                    
+                    // Mostrar resultados
+                    let html = '<div class="list-group">';
+                    data.servicios.forEach(servicio => {
+                        html += `
+                            <button type="button" class="list-group-item list-group-item-action" 
+                                    onclick="seleccionarServicio(${servicio.id}, '${servicio.nombre}', ${servicio.precio_base})">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>${servicio.nombre}</strong>
+                                        <br><small class="text-muted">${servicio.categoria}</small>
+                                    </div>
+                                    <div class="text-success fw-bold">
+                                        $${servicio.precio_base.toFixed(2)}
+                                    </div>
+                                </div>
+                            </button>
+                        `;
+                    });
+                    html += '</div>';
+                    
+                    resultadosDiv.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultadosDiv.innerHTML = '<div class="alert alert-danger">Error al buscar servicios</div>';
+                });
+        }, 300);
+    });
+    
+    // Función para seleccionar un servicio
+    function seleccionarServicio(id, nombre, precioBase) {
+        servicioIdInput.value = id;
+        nombreServicioSpan.textContent = nombre;
+        precioInput.value = precioBase.toFixed(2);
+        
+        servicioSeleccionadoDiv.classList.remove('d-none');
+        resultadosDiv.innerHTML = '';
+        buscarInput.value = '';
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends "base.htm" %}
+
+{% block title %}Gestión de Servicios - Wedding Plan{% endblock %}
+
+{% block head_css %}
+<link rel="stylesheet" href="https://raw.githack.com/Lalo789/WeedingPlan/main/css/tables.css">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-5">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="fas fa-concierge-bell"></i> Gestión de Servicios</h1>
+            <p class="lead">Administra el catálogo de servicios disponibles</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('admin_nuevo_servicio') }}" class="btn btn-gold btn-lg">
+                <i class="fas fa-plus-circle"></i> Nuevo Servicio
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nombre...">
+                        </div>
+                        <div class="col-md-3">
+                            <select id="categoriaFilter" class="form-select">
+                                <option value="">Todas las categorías</option>
+                                <option value="decoracion">Decoración</option>
+                                <option value="catering">Catering</option>
+                                <option value="fotografia">Fotografía</option>
+                                <option value="entretenimiento">Entretenimiento</option>
+                                <option value="coordinacion">Coordinación</option>
+                                <option value="reposteria">Repostería</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="disponibilidadFilter" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="disponible">Disponibles</option>
+                                <option value="no-disponible">No Disponibles</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-secondary w-100" onclick="resetFilters()">
+                                <i class="fas fa-redo"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Servicios -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-custom shadow">
+                <div class="card-header" style="background-color: var(--color-oro); color: white;">
+                    <h4 class="mb-0">
+                        <i class="fas fa-list"></i> Listado de Servicios 
+                        <span class="badge bg-light text-dark ms-2" id="countBadge">{{ servicios|length }}</span>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if servicios %}
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="serviciosTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Categoría</th>
+                                        <th>Precio Base</th>
+                                        <th>Disponible</th>
+                                        <th>Fecha Creación</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for servicio in servicios %}
+                                        <tr data-categoria="{{ servicio.categoria }}" data-disponible="{{ servicio.disponible }}">
+                                            <td>{{ servicio.id }}</td>
+                                            <td>
+                                                <strong>{{ servicio.nombre }}</strong>
+                                                {% if servicio.descripcion %}
+                                                    <br><small class="text-muted">{{ servicio.descripcion[:50] }}{% if servicio.descripcion|length > 50 %}...{% endif %}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ servicio.categoria }}</span>
+                                            </td>
+                                            <td class="fw-bold text-success">{{ servicio.precio_base|currency }}</td>
+                                            <td>
+                                                {% if servicio.disponible %}
+                                                    <span class="badge bg-success"><i class="fas fa-check"></i> Sí</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger"><i class="fas fa-times"></i> No</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ servicio.fecha_creacion|datetime_format('%d/%m/%Y') if servicio.fecha_creacion else 'N/A' }}</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ url_for('admin_editar_servicio', servicio_id=servicio.id) }}" 
+                                                       class="btn btn-sm btn-warning" title="Editar">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-danger" 
+                                                            onclick="confirmarEliminar('{{ servicio.id }}', '{{ servicio.nombre }}')" 
+                                                            title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle fa-2x mb-3"></i>
+                            <p>No hay servicios registrados todavía.</p>
+                            <a href="{{ url_for('admin_nuevo_servicio') }}" class="btn btn-gold">
+                                <i class="fas fa-plus-circle"></i> Crear Primer Servicio
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="eliminarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro que deseas eliminar el servicio <strong id="servicioNombre"></strong>?</p>
+                <p class="text-danger"><strong>Esta acción no se puede deshacer.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" id="formEliminar" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Eliminar Servicio</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filtro de búsqueda en tiempo real
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        filterTable();
+    });
+    
+    document.getElementById('categoriaFilter').addEventListener('change', function() {
+        filterTable();
+    });
+    
+    document.getElementById('disponibilidadFilter').addEventListener('change', function() {
+        filterTable();
+    });
+    
+    function filterTable() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const categoriaFilter = document.getElementById('categoriaFilter').value.toLowerCase();
+        const disponibilidadFilter = document.getElementById('disponibilidadFilter').value;
+        
+        const rows = document.querySelectorAll('#serviciosTable tbody tr');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const nombre = row.cells[1].textContent.toLowerCase();
+            const categoria = row.getAttribute('data-categoria').toLowerCase();
+            const disponible = row.getAttribute('data-disponible');
+            
+            let showRow = true;
+            
+            // Filtro de búsqueda
+            if (searchTerm && !nombre.includes(searchTerm)) {
+                showRow = false;
+            }
+            
+            // Filtro de categoría
+            if (categoriaFilter && categoria !== categoriaFilter) {
+                showRow = false;
+            }
+            
+            // Filtro de disponibilidad
+            if (disponibilidadFilter === 'disponible' && disponible !== 'True') {
+                showRow = false;
+            } else if (disponibilidadFilter === 'no-disponible' && disponible !== 'False') {
+                showRow = false;
+            }
+            
+            if (showRow) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Actualizar contador
+        document.getElementById('countBadge').textContent = visibleCount;
+    }
+    
+    function resetFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('categoriaFilter').value = '';
+        document.getElementById('disponibilidadFilter').value = '';
+        filterTable();
+    }
+    
+    function confirmarEliminar(servicioId, servicioNombre) {
+        document.getElementById('servicioNombre').textContent = servicioNombre;
+        document.getElementById('formEliminar').action = `/admin/servicio/${servicioId}/eliminar`;
+        
+        const modal = new bootstrap.Modal(document.getElementById('eliminarModal'));
+        modal.show();
+    }
+</script>
+{% endblock %}

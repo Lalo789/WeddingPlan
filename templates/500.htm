@@ -1,0 +1,33 @@
+{% extends "base.htm" %}
+
+{% block title %}Error del Servidor - Wedding Plan{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card card-custom shadow-lg">
+                <div class="card-body p-5">
+                    <i class="fas fa-exclamation-triangle fa-5x text-warning mb-4"></i>
+                    <h1 class="display-1 fw-bold text-warning">500</h1>
+                    <h2 class="mb-3">Error del Servidor</h2>
+                    <p class="lead text-muted mb-4">
+                        Algo salió mal en nuestro servidor. Estamos trabajando para solucionarlo.
+                    </p>
+                    <p class="text-muted">
+                        Por favor, intenta nuevamente en unos momentos.
+                    </p>
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-gold btn-lg">
+                            <i class="fas fa-home"></i> Volver al Inicio
+                        </a>
+                        <button onclick="location.reload()" class="btn btn-outline-secondary">
+                            <i class="fas fa-redo"></i> Recargar Página
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

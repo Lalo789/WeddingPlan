@@ -1,0 +1,75 @@
+{% extends "base.htm" %}
+
+{% block title %}Gestión de Eventos - Wedding Plan{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="fas fa-calendar-alt"></i> Gestión de Eventos</h1>
+            <p class="lead">Visualiza y gestiona todos los eventos del sistema</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-custom shadow">
+                <div class="card-body">
+                    {% if eventos %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Evento</th>
+                                        <th>Cliente</th>
+                                        <th>Fecha Evento</th>
+                                        <th>Lugar</th>
+                                        <th>Estado</th>
+                                        <th>Servicios</th>
+                                        <th>Total</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for evento in eventos %}
+                                        <tr>
+                                            <td>{{ evento.id }}</td>
+                                            <td><strong>{{ evento.titulo }}</strong></td>
+                                            <td>{{ evento.cliente.nombre_completo }}</td>
+                                            <td>{{ evento.fecha_evento|datetime_format('%d/%m/%Y %H:%M') }}</td>
+                                            <td>{{ evento.lugar[:30] }}...</td>
+                                            <td>
+                                                {% if evento.estado == 'pendiente' %}
+                                                    <span class="badge bg-warning text-dark">Pendiente</span>
+                                                {% elif evento.estado == 'confirmado' %}
+                                                    <span class="badge bg-success">Confirmado</span>
+                                                {% elif evento.estado == 'cancelado' %}
+                                                    <span class="badge bg-danger">Cancelado</span>
+                                                {% elif evento.estado == 'completado' %}
+                                                    <span class="badge bg-info">Completado</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ evento.servicios_contratados|length }}</td>
+                                            <td class="text-success fw-bold">{{ evento.calcular_total()|currency }}</td>
+                                            <td>
+                                                <a href="{{ url_for('admin_ver_evento', evento_id=evento.id) }}" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-eye"></i> Ver
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            No hay eventos registrados.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

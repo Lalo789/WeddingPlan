@@ -1,0 +1,38 @@
+{% extends "base.htm" %}
+
+{% block title %}Acceso Prohibido - Wedding Plan{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card card-custom shadow-lg">
+                <div class="card-body p-5">
+                    <i class="fas fa-lock fa-5x text-danger mb-4"></i>
+                    <h1 class="display-1 fw-bold text-danger">403</h1>
+                    <h2 class="mb-3">Acceso Prohibido</h2>
+                    <p class="lead text-muted mb-4">
+                        No tienes permisos para acceder a esta página.
+                    </p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('index') }}" class="btn btn-gold btn-lg">
+                            <i class="fas fa-home"></i> Volver al Inicio
+                        </a>
+                        {% if current_user.is_authenticated %}
+                            {% if current_user.es_admin() %}
+                                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-tachometer-alt"></i> Ir al Dashboard
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('cliente_dashboard') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-calendar"></i> Ver Mis Eventos
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

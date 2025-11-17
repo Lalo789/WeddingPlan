@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Wedding Plan{% endblock %}</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://raw.githack.com/Lalo789/WeedingPlan/main/css/style.css">    
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    {% block head_css %}{% endblock %}
+    
+    <style>
+        :root {
+            --color-fondo: #FAF3E0;
+            --color-texto: #5D4037;
+            --color-oro: #C0A062;
+            --fuente-titulos: 'Great Vibes', cursive;
+            --fuente-cuerpo: 'Montserrat', sans-serif;
+        }
+        
+        body {
+            font-family: var(--fuente-cuerpo);
+            background-color: var(--color-fondo);
+            color: var(--color-texto);
+            padding-top: 80px;
+        }
+        
+        .navbar-custom {
+            background-color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
+        }
+        
+        .navbar-brand {
+            font-family: var(--fuente-titulos);
+            font-size: 2.5rem;
+            color: var(--color-oro) !important;
+        }
+        
+        .nav-link {
+            color: var(--color-texto) !important;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--color-oro) !important;
+        }
+        
+        .btn-gold {
+            background-color: var(--color-oro);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gold:hover {
+            background-color: #a8874a;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        h1, h2, h3 {
+            font-family: var(--fuente-titulos);
+            color: var(--color-oro);
+        }
+        
+        .footer-custom {
+            background-color: white;
+            border-top: 2px solid var(--color-oro);
+            margin-top: 50px;
+        }
+        
+        .footer-title {
+            font-family: var(--fuente-titulos);
+            font-size: 2rem;
+            color: var(--color-oro);
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border-color: var(--color-oro);
+            color: var(--color-texto);
+        }
+        
+        .card-custom {
+            border: 2px solid var(--color-oro);
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light navbar-custom fixed-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="{{ url_for('index') }}">Wedding Plan</a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('servicios') }}">Servicios</a>
+                    </li>
+                    
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.es_admin() %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Dashboard Admin</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin_eventos') }}">Eventos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin_servicios') }}">Gestión Servicios</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('cliente_dashboard') }}">Mis Eventos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('cliente_nuevo_evento') }}">Crear Evento</a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle fa-lg"></i> {{ current_user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">
+                                    <i class="fas fa-user"></i> Perfil
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">Iniciar Sesión</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('registro') }}" class="btn btn-gold ms-2">Registrarse</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {% if category == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif category == 'danger' %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                        {% elif category == 'warning' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% elif category == 'info' %}
+                            <i class="fas fa-info-circle"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="container-fluid">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer-custom py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 text-center mb-4">
+                    <h3 class="footer-title">Nuestra Misión</h3>
+                    <p>Gestionar, organizar y optimizar la planificación de eventos para convertir tus sueños en realidad.</p>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <h3 class="footer-title">Nuestra Visión</h3>
+                    <p>Ser la plataforma líder y de confianza en la planificación de bodas y celebraciones memorables.</p>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <h3 class="footer-title">Contacto</h3>
+                    <p><strong>Cliente:</strong> Meztly Alberdi Tejeda<br>
+                    <strong>WhatsApp:</strong> 443-322-1100</p>
+                </div>
+            </div>
+            
+            <!-- Validadores W3C -->
+            <div class="text-center pt-4 border-top">
+                <a href="http://validator.w3.org/check?uri=referer" target="_blank" class="me-3">
+                    <img src="https://www.w3.org/Icons/valid-html401" alt="Valid HTML">
+                </a>
+                <a href="http://jigsaw.w3.org/css-validator/check/referer" target="_blank">
+                    <img src="http://jigsaw.w3.org/css-validator/images/vcss" alt="Valid CSS">
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

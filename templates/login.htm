@@ -1,0 +1,113 @@
+{% extends "base.htm" %}
+
+{% block title %}Iniciar Sesión - Wedding Plan{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 col-lg-5">
+            <div class="card card-custom shadow-lg">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </h2>
+                    
+                    <form method="POST" action="{{ url_for('login') }}" id="loginForm" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Campo Username -->
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label fw-bold") }}
+                            {{ form.username(class="form-control" ~ (" is-invalid" if form.username.errors else "")) }}
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Campo Password -->
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                {{ form.password(class="form-control" ~ (" is-invalid" if form.password.errors else ""), id="passwordInput") }}
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Checkbox Recordarme -->
+                        <div class="mb-3 form-check">
+                            {{ form.remember(class="form-check-input") }}
+                            {{ form.remember.label(class="form-check-label") }}
+                        </div>
+                        
+                        <!-- Botón Submit -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-gold btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Ingresar
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-0">¿No tienes cuenta? 
+                            <a href="{{ url_for('registro') }}" class="text-decoration-none fw-bold" style="color: var(--color-oro);">
+                                Regístrate aquí
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Validación del lado del cliente con Bootstrap
+    (function() {
+        'use strict';
+        
+        const form = document.getElementById('loginForm');
+        
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            form.classList.add('was-validated');
+        }, false);
+    })();
+    
+    // Toggle para mostrar/ocultar contraseña
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordInput = document.getElementById('passwordInput');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    });
+</script>
+{% endblock %}

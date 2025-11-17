@@ -1,0 +1,45 @@
+﻿# Entorno Virtual
+.venv/
+venv/
+ENV/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+
+# Flask
+instance/
+.webassets-cache
+
+# Base de Datos
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Sistema Operativo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporales
+*.tmp
+*.bak
+
+# Backup
+*_BACKUP/
+
+# HTML validación
+html_validacion/
