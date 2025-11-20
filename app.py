@@ -565,7 +565,7 @@ def verificar_username():
     else:
         return jsonify({'disponible': True, 'mensaje': 'Username disponible'})
     
-@app.route('/api/buscar-sericios', methods=["GET"])
+@app.route('/api/buscar-servicios', methods=["GET"])
 def buscar_servicios():
     "Endpoint AJAX para buscar servicios en tiempo real"
     query = request.args.get('q', '').strip().lower()
@@ -618,5 +618,21 @@ def verificar_email():
         return jsonify({'disponible': True, 'mensaje': 'Email disponible'})
     
 if __name__ == '__main__':
-    app.run(debug=True, ssl_context='adhoc')
+    import os
+    
+    # Variable para activar HTTPS local
+    usar_https_local = os.environ.get('HTTPS_LOCAL', 'False') == 'True'
+    
+    if usar_https_local:
+        print("Ejecutando con HTTPS")
+        print(" Tu navegador mostrará advertencia de seguridad")
+        print(" Accede a: https://localhost:5000")
+        app.run(
+            debug=True,
+            ssl_context='adhoc' 
+        )
+    else:
+        print(" Ejecutando en HTTP")
+        print("Accede a: http://localhost:5000")
+        app.run(debug=True)
     
