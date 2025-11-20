@@ -1,0 +1,194 @@
+{% extends "base.htm" %}
+
+{% block title %}{{ accion }} Servicio - Wedding Plan{% endblock %}
+
+{% block head_css %}
+<link rel="stylesheet" href="https://raw.githack.com/Lalo789/WeedingPlan/main/css/forms.css">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card card-custom shadow-lg">
+                <div class="card-header text-white text-center py-3" style="background-color: var(--color-oro);">
+                    <h2 class="mb-0">
+                        <i class="fas fa-concierge-bell"></i> {{ accion }} Servicio
+                    </h2>
+                </div>
+                <div class="card-body p-5">
+                    <form method="POST" id="servicioForm" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Nombre del Servicio -->
+                        <div class="mb-4">
+                            {{ form.nombre.label(class="form-label fw-bold") }}
+                            {{ form.nombre(class="form-control form-control-lg" ~ (" is-invalid" if form.nombre.errors else "")) }}
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.nombre.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Categoría y Precio -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                {{ form.categoria.label(class="form-label fw-bold") }}
+                                {{ form.categoria(class="form-select" ~ (" is-invalid" if form.categoria.errors else "")) }}
+                                {% if form.categoria.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.categoria.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                {{ form.precio_base.label(class="form-label fw-bold") }}
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.precio_base(class="form-control" ~ (" is-invalid" if form.precio_base.errors else "")) }}
+                                    <span class="input-group-text">MXN</span>
+                                </div>
+                                {% if form.precio_base.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.precio_base.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Descripción -->
+                        <div class="mb-4">
+                            {{ form.descripcion.label(class="form-label fw-bold") }}
+                            {{ form.descripcion(class="form-control" ~ (" is-invalid" if form.descripcion.errors else ""), rows="5") }}
+                            <div class="form-text">
+                                <span id="charCount">0</span>/1000 caracteres
+                            </div>
+                            {% if form.descripcion.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.descripcion.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- URL de Imagen -->
+                        <div class="mb-4">
+                            {{ form.imagen_url.label(class="form-label fw-bold") }}
+                            {{ form.imagen_url(class="form-control" ~ (" is-invalid" if form.imagen_url.errors else "")) }}
+                            <div class="form-text">URL de una imagen representativa del servicio (opcional)</div>
+                            {% if form.imagen_url.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.imagen_url.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Preview de imagen -->
+                            <div id="imagePreview" class="mt-3" style="display:none;">
+                                <img id="previewImg" src="" alt="Preview" class="img-fluid rounded" style="max-height: 200px;">
+                            </div>
+                        </div>
+                        
+                        <!-- Disponible -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                {{ form.disponible(class="form-check-input", id="disponibleSwitch", role="switch") }}
+                                {{ form.disponible.label(class="form-check-label fw-bold", for="disponibleSwitch") }}
+                            </div>
+                            <div class="form-text">Los servicios no disponibles no aparecerán en el catálogo público</div>
+                        </div>
+                        
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between mt-5">
+                            <a href="{{ url_for('admin_servicios') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-gold btn-lg">
+                                <i class="fas fa-save"></i> {{ accion }} Servicio
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Validación del lado del cliente
+    (function() {
+        'use strict';
+        const form = document.getElementById('servicioForm');
+        
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    })();
+    
+    // Contador de caracteres para descripción
+    const descripcionField = document.getElementById('descripcion');
+    const charCount = document.getElementById('charCount');
+    
+    if (descripcionField) {
+        descripcionField.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+            
+            if (this.value.length > 1000) {
+                charCount.classList.add('text-danger');
+            } else {
+                charCount.classList.remove('text-danger');
+            }
+        });
+        
+        // Inicializar contador
+        charCount.textContent = descripcionField.value.length;
+    }
+    
+    // Preview de imagen
+    const imagenUrlField = document.getElementById('imagen_url');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    
+    if (imagenUrlField) {
+        imagenUrlField.addEventListener('blur', function() {
+            const url = this.value.trim();
+            
+            if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+                previewImg.src = url;
+                imagePreview.style.display = 'block';
+                
+                // Ocultar si la imagen falla al cargar
+                previewImg.onerror = function() {
+                    imagePreview.style.display = 'none';
+                };
+            } else {
+                imagePreview.style.display = 'none';
+            }
+        });
+        
+        // Cargar preview si ya hay URL
+        if (imagenUrlField.value) {
+            imagenUrlField.dispatchEvent(new Event('blur'));
+        }
+    }
+    
+    // Formatear precio
+    const precioField = document.getElementById('precio_base');
+    if (precioField) {
+        precioField.addEventListener('blur', function() {
+            if (this.value) {
+                const value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    this.value = value.toFixed(2);
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
