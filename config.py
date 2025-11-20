@@ -1,8 +1,18 @@
-import os 
+import os
 from datetime import timedelta
 
-#Conezion a la base de datos
-SQLALCHEMY_DATABASE_URI = "postgresql://postgres:12345@localhost:5432/WeddingPlan?client_encoding=latin1"
+# --- CORRECCIÓN IMPORTANTE ---
+# Obtenemos la URL de la variable de entorno (Render).
+# Si no existe, usamos la local (Tu PC).
+database_url = os.environ.get('DATABASE_URL')
+
+# Fix para Render: Render devuelve 'postgres://' pero SQLAlchemy necesita 'postgresql://'
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+SQLALCHEMY_DATABASE_URI = database_url or "postgresql://postgres:12345@localhost:5432/WeddingPlan?client_encoding=latin1"
+# -----------------------------
+
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production-2025'
