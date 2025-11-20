@@ -150,6 +150,7 @@
                                             <td>{{ es.fecha_agregado|datetime_format('%d/%m/%Y') }}</td>
                                             <td>
                                                 <form method="POST" action="{{ url_for('cliente_eliminar_servicio', evento_id=evento.id, servicio_id=es.servicio.id) }}" style="display:inline;">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este servicio del evento?')">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
@@ -200,6 +201,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST" action="{{ url_for('cliente_agregar_servicio', evento_id=evento.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="modal-body">
                     <!-- Búsqueda AJAX -->
                     <div class="mb-3">
@@ -251,6 +253,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, mantener evento</button>
                 <form method="POST" action="{{ url_for('cliente_cancelar_evento', evento_id=evento.id) }}" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <button type="submit" class="btn btn-danger">Sí, cancelar evento</button>
                 </form>
             </div>
