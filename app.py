@@ -3,6 +3,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_bcrypt import Bcrypt
 from functools import wraps
 from datetime import datetime
+from email_validator import validate_email, EmailNotValidError
 
 from db import db  
 from models import Usuario, Cliente, Servicio, Proveedor, Evento, EventoServicio
@@ -37,7 +38,6 @@ def admin_required(f):
 
 
 # RUTAS PÚBLICAS
-
 @app.route('/')
 def index():
     """Página principal - Accesible para todos"""
@@ -604,18 +604,18 @@ def verificar_email():
     if not email:
         return jsonify({'disponible': False, 'mensaje': 'El email no puede estar vacío.'})
     
-    #Validacion basica de formato
-    import re
-    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-        return jsonify({'disponible': False, 'mensaje': 'Formato de email inválido.'})
+   #Validacion robusta de emial
+    try:
+        validate_email(email, check_deliverability=False)
+    except EmailNotValidError as e:
+        return jsonify({'disponible': False, 'mensaje': str(e)})
     
-    #Buscar en DB
     usuario_existente = Usuario.query.filter_by(email=email).first()
     
     if usuario_existente:
-        return jsonify({'disponible': False, 'mensaje': 'El email ya está en uso'})
+        return jsonify({'disponible': False, 'mensaje': 'El email ya está en uso.'})
     else:
-        return jsonify({'disponible': True, 'mensaje': 'Email disponible'})
+        return jsonify({'disponible': True, 'mensaje': 'Email disponible.'})
     
 if __name__ == '__main__':
     import os

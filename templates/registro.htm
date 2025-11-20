@@ -126,6 +126,8 @@
 
 {% block extra_js %}
 <script>
+const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
     // Validación del lado del cliente
     (function() {
         'use strict';
@@ -158,120 +160,120 @@
         }
     });
 
-    //AJAX para verificar el username en tiempo real
-    let timeoutUsername;
-    const usernameInput = document.getElementById('username');
-    const usernameParent = usernameInput.closest('.mb-3');
+// AJAX: Verificar disponibilidad de username
+let timeoutUsername;
+const usernameInput = document.getElementById('username');
+const usernameParent = usernameInput.closest('.mb-3');
 
-    usernameInput.addEventListener('input', function() {
-
-        clearTiemout(timeoutUsername);
-
-        //Limpiar el feedback anterior
-        let feedback = usernameParent.querySelector('.ajax-feedback');
-        if (feedback) feedback.remove();
-
-        if (username.length < 3) {
-            return; //No verificar si es muy corto
-        }
+usernameInput.addEventListener('input', function() {
+    clearTimeout(timeoutUsername);
+    
+    const username = this.value.trim(); 
+    
+    // Limpiar feedback anterior
+    let feedback = usernameParent.querySelector('.ajax-feedback');
+    if (feedback) feedback.remove();
+    
+    if (username.length < 3) {
+        return; // No verificar si es muy corto
+    }
+    
+    // Esperar 500ms después de que el usuario deje de escribir
+    timeoutUsername = setTimeout(() => {
+        usernameInput.classList.add('is-validating');
         
-        //Esperar 500ms después de que el usuario deje de escribir
-        timeoutUsername = setTimeout(() => {
-            //Mostrar un indicador de carga
-            usernameInput.classList.add('is-validating');
-
-            //Petición AJAX
-            fetch('/api/verificar-username',{
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({username: usernameInput.value})
-            })
-            .then(response => response.json())
-            .then(data => {
-                usernameInput.classList.remove('is-validating');
-
-                //crear elemento de feedback
-                const feedbackDiv = document.createElement('div');
-                feedbackDiv.classList.add('ajax-feedback mt-1');
-
-                if (data.disponible){
-                    feedbackDiv.innerHTML = '<small class="text-success"><i class="fas fa-check-circle"></i> ${data.mensaje}</small>';
-                    usernameInput.classList.remove('is-invalid');
-                    usernameInput.classList.add('is-valid');
-                }else{
-                    feedbackDiv.innerHTML = '<small class="text-danger"><i class="fas fa-times-circle"></i> ${data.mensaje}</small>';
-                    usernameInput.classList.remove('is-valid');
-                    usernameInput.classList.add('is-invalid');
-                }
-
-                usernameParent.appendChild(feedbackDiv);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                usernameInput.classList.remove('is-validating');
+        // Petición AJAX
+        fetch('/api/verificar-username', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({username: username})
         })
+        .then(response => response.json())
+        .then(data => {
+            usernameInput.classList.remove('is-validating');
+            
+            // Crear elemento de feedback
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.classList.add('ajax-feedback', 'mt-1');
+            
+            if (data.disponible) {
+                feedbackDiv.innerHTML = `<small class="text-success"><i class="fas fa-check-circle"></i> ${data.mensaje}</small>`;
+                usernameInput.classList.remove('is-invalid');
+                usernameInput.classList.add('is-valid');
+            } else {
+                feedbackDiv.innerHTML = `<small class="text-danger"><i class="fas fa-times-circle"></i> ${data.mensaje}</small>`;
+                usernameInput.classList.remove('is-valid');
+                usernameInput.classList.add('is-invalid');
+            }
+            
+            usernameParent.appendChild(feedbackDiv);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            usernameInput.classList.remove('is-validating');
+        });
     }, 500);
-    });
+});
 
-    //AJAX verificar email en tiempo real
-    let timeoutEmail;
-    const emailInput = document.getElementById('email');
-    const emailParent = emailInput.closest('.mb-3');
+    // AJAX: Verificar disponibilidad de email
+let timeoutEmail;
+const emailInput = document.getElementById('email'); 
+const emailParent = emailInput.closest('.mb-3');
 
-    emailImput.addEventListener('input', function() {
-
-        clearTiemout(timeoutEmail);
-
+    emailInput.addEventListener('input', function() { 
+        clearTimeout(timeoutEmail);
+        
         const email = this.value.trim();
-
-        //Limpiar el feedback anterior
+        
+        // Limpiar feedback anterior
         let feedback = emailParent.querySelector('.ajax-feedback');
         if (feedback) feedback.remove();
-
-        if(email.length < 5 ){
+        
+        if (email.length < 5) {
             return; 
         }
-
+        
         timeoutEmail = setTimeout(() => {
             emailInput.classList.add('is-validating');
-
-            //Petición AJAX
-            fetch('/api/verificar-email',{
+            
+            // Petición AJAX
+            fetch('/api/verificar-email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
+                    , 'X-CSRFToken': csrfToken
                 },
                 body: JSON.stringify({email: email})
             })
             .then(response => response.json())
             .then(data => {
                 emailInput.classList.remove('is-validating');
-
-                //crear elemento de feedback
+                
+                // Crear elemento de feedback
                 const feedbackDiv = document.createElement('div');
-                feedbackDiv.className.add('ajax-feedback', 'mt-1');
-
-                if (data.disponible){
-                    feedbackDiv.innerHTML = '<small class="text-success"><i class="fas fa-check-circle"></i> ${data.mensaje}</small>';
+                feedbackDiv.classList.add('ajax-feedback', 'mt-1');
+                
+                if (data.disponible) {
+                    feedbackDiv.innerHTML = `<small class="text-success"><i class="fas fa-check-circle"></i> ${data.mensaje}</small>`;
                     emailInput.classList.remove('is-invalid');
                     emailInput.classList.add('is-valid');
-                }else{
-                    feedbackDiv.innerHTML = '<small class="text-danger"><i class="fas fa-times-circle"></i> ${data.mensaje}</small>';
+                } else {
+                    feedbackDiv.innerHTML = `<small class="text-danger"><i class="fas fa-times-circle"></i> ${data.mensaje}</small>`;
                     emailInput.classList.remove('is-valid');
                     emailInput.classList.add('is-invalid');
                 }
-
+                
                 emailParent.appendChild(feedbackDiv);
             })
             .catch(error => {
                 console.error('Error:', error);
                 emailInput.classList.remove('is-validating');
-            })
+            });
         }, 500);
-    });
-    
+});
     // Indicador de fortaleza de contraseña
     document.getElementById('passwordInput').addEventListener('input', function() {
         const password = this.value;

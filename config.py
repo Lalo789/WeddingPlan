@@ -6,12 +6,10 @@ from datetime import timedelta
 # Si no existe, usamos la local (Tu PC).
 database_url = os.environ.get('DATABASE_URL')
 
-# Fix para Render: Render devuelve 'postgres://' pero SQLAlchemy necesita 'postgresql://'
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
 SQLALCHEMY_DATABASE_URI = database_url or "postgresql://postgres:12345@localhost:5432/WeddingPlan?client_encoding=latin1"
-# -----------------------------
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 

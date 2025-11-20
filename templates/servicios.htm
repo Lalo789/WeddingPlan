@@ -3,8 +3,36 @@
 {% block title %}Nuestros Servicios - Wedding Plan{% endblock %}
 
 {% block content %}
+<style>
+    .servicio-item {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+    }
+    
+    .servicio-item.fade-in {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .filter-btn {
+        transition: all 0.3s ease;
+    }
+    
+    .filter-btn.active {
+        background-color: var(--color-oro);
+        color: white;
+        border-color: var(--color-oro);
+    }
+    
+    .filter-btn:hover {
+        background-color: var(--color-oro);
+        color: white;
+        border-color: var(--color-oro);
+    }
+</style>
+
 <div class="container my-5">
-    <!-- Encabezado -->
     <div class="row mb-5 text-center">
         <div class="col-12">
             <h1 class="display-3">Nuestros Servicios</h1>
@@ -12,7 +40,6 @@
         </div>
     </div>
 
-    <!-- Filtro por Categoría -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-center flex-wrap gap-2">
@@ -41,7 +68,6 @@
         </div>
     </div>
 
-    <!-- Grid de Servicios -->
     {% if servicios %}
         <div class="row g-4" id="serviciosGrid">
             {% for servicio in servicios %}
@@ -81,7 +107,6 @@
                     </div>
                 </div>
                 
-                <!-- Modal de Detalle del Servicio -->
                 <div class="modal fade" id="detalleModal{{ servicio.id }}" tabindex="-1">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
@@ -195,33 +220,4 @@
         observer.observe(item);
     });
 </script>
-
-<style>
-    .servicio-item {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.5s ease;
-    }
-    
-    .servicio-item.fade-in {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    
-    .filter-btn {
-        transition: all 0.3s ease;
-    }
-    
-    .filter-btn.active {
-        background-color: var(--color-oro);
-        color: white;
-        border-color: var(--color-oro);
-    }
-    
-    .filter-btn:hover {
-        background-color: var(--color-oro);
-        color: white;
-        border-color: var(--color-oro);
-    }
-</style>
 {% endblock %}
